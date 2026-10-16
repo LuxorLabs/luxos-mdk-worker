@@ -1,0 +1,6 @@
+LuxOS MDK Worker
+Copyright 2026 Luxor Technology Corporation
+
+This product is a Worker for the Tether MDK project, which is licensed
+under the Apache License, Version 2.0. It runs on the MDK WorkerRuntimeV2
+and follows the layout of the Antminer and WhatsMiner MDK workers.

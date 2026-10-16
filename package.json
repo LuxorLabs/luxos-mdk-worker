@@ -1,0 +1,52 @@
+{
+  "name": "luxos-mdk-worker",
+  "version": "0.1.0",
+  "description": "Tether MDK worker for miners running LuxOS firmware",
+  "keywords": [
+    "tether",
+    "mdk",
+    "luxos",
+    "luxor",
+    "miner"
+  ],
+  "author": "Luxor Technology Corporation",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LuxorLabs/luxos-mdk-worker.git"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "type": "commonjs",
+  "files": [
+    "mdk-contract.json",
+    "src/",
+    "lib/",
+    "mock/",
+    "README.md",
+    "USAGE.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "setup:mdk": "npm --prefix node_modules/@tetherto/mdk install --ignore-scripts",
+    "lint": "standard",
+    "lint:fix": "standard --fix",
+    "mock": "node mock/luxos-server.js",
+    "test": "npm run lint && npm run validate:contract && npm run test:unit && npm run test:integration",
+    "test:unit": "NODE_ENV=test brittle tests/unit/*.test.js",
+    "test:integration": "NODE_ENV=test brittle tests/integration/*.test.js",
+    "test:coverage": "NODE_ENV=test brittle --coverage 'tests/**/*.test.js'",
+    "test:live": "node scripts/test-live-readonly.js",
+    "validate:contract": "node scripts/validate-contract.js"
+  },
+  "devDependencies": {
+    "@tetherto/mdk": "github:tetherto/mdk#7f5cae88f67cd0ebedaa325778f9209135de1b8f",
+    "brittle": "3.18.0",
+    "standard": "17.1.0"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9"
+  }
+}

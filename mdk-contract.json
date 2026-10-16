@@ -1,0 +1,262 @@
+{
+  "$schema": "../../../../core/mdk-worker/mdk-contract.schema.json",
+  "metadata": {
+    "provider": "luxor",
+    "deviceFamily": "miner",
+    "brand": "LuxOS",
+    "modelsSupported": [],
+    "overview": "Monitors and controls miners running Luxor's LuxOS firmware through the LuxOS TCP API on port 4028. Compatibility follows the firmware, not the hardware model: any miner running LuxOS answers the same API. The API has no authentication, so keep miners on a trusted network. Writes use a LuxOS session and never take over a session held by someone else. Operations affect physical hardware — prioritize thermal safety."
+  },
+  "capabilities": {
+    "telemetry": [
+      {
+        "name": "hashrate_rt",
+        "unit": "TH/s",
+        "type": "number",
+        "handler": "src/telemetry/hashrate-rt.js",
+        "description": "Hashrate over the last 5 seconds (summary GHS 5s)."
+      },
+      {
+        "name": "hashrate_avg",
+        "unit": "TH/s",
+        "type": "number",
+        "handler": "src/telemetry/hashrate-avg.js",
+        "description": "Average hashrate since the miner application started (summary GHS av)."
+      },
+      {
+        "name": "hashrate_ideal",
+        "unit": "TH/s",
+        "type": "number",
+        "handler": "src/telemetry/hashrate-ideal.js",
+        "description": "Sum of the hashboards' nominal hashrate. A persistent gap versus hashrate_rt indicates degraded or throttled hashboards."
+      },
+      {
+        "name": "power",
+        "unit": "W",
+        "type": "number",
+        "handler": "src/telemetry/power.js",
+        "description": "Power draw in watts. Measured by newer PSUs (APW17, 3-phase APW11) and estimated for older ones."
+      },
+      {
+        "name": "efficiency",
+        "unit": "W/TH",
+        "type": "number",
+        "handler": "src/telemetry/efficiency.js",
+        "description": "Power divided by the 30-minute hashrate. null while the miner is not hashing."
+      },
+      {
+        "name": "temperature",
+        "unit": "C",
+        "type": "number",
+        "handler": "src/telemetry/temperature.js",
+        "description": "Highest hashboard temperature. null when no board reports a temperature."
+      },
+      {
+        "name": "fans",
+        "unit": "RPM",
+        "type": "array",
+        "handler": "src/telemetry/fans.js",
+        "description": "Fans as { index, rpm, speed_pct, connector }. Empty on hydro and immersion machines, which have no fans. A fan at 0 RPM on a running air-cooled miner is a mechanical failure."
+      },
+      {
+        "name": "status",
+        "unit": "",
+        "type": "string",
+        "handler": "src/telemetry/status.js",
+        "description": "error when LuxOS reports an active event, sleeping when curtailed, otherwise mining or not_mining from the 5-second hashrate."
+      },
+      {
+        "name": "uptime",
+        "unit": "s",
+        "type": "number",
+        "handler": "src/telemetry/uptime.js",
+        "description": "Seconds since the miner application started."
+      },
+      {
+        "name": "power_mode",
+        "unit": "",
+        "type": "string",
+        "handler": "src/telemetry/power-mode.js",
+        "description": "normal, or sleep while the miner is curtailed."
+      },
+      {
+        "name": "profile",
+        "unit": "",
+        "type": "string",
+        "handler": "src/telemetry/profile.js",
+        "description": "Name of the active LuxOS performance profile."
+      },
+      {
+        "name": "accepted_shares",
+        "unit": "",
+        "type": "number",
+        "handler": "src/telemetry/accepted-shares.js",
+        "description": "Accepted shares since the miner application started."
+      },
+      {
+        "name": "rejected_shares",
+        "unit": "",
+        "type": "number",
+        "handler": "src/telemetry/rejected-shares.js",
+        "description": "Rejected, non-stale shares since the miner application started. A rising count indicates pool or network problems."
+      },
+      {
+        "name": "pool_url",
+        "unit": "",
+        "type": "string",
+        "handler": "src/telemetry/pool-url.js",
+        "description": "URL of the first alive pool, or the first configured pool when none is alive."
+      },
+      {
+        "name": "pools",
+        "unit": "",
+        "type": "array",
+        "handler": "src/telemetry/pools.js",
+        "description": "Configured pools in priority order with status and share counters. Pool passwords are never included."
+      },
+      {
+        "name": "hashboards",
+        "unit": "",
+        "type": "array",
+        "handler": "src/telemetry/hashboards.js",
+        "description": "Per-board status, profile, real/average/nominal hashrate, temperature, labeled sensor readings, hardware errors and serial number."
+      },
+      {
+        "name": "errors",
+        "unit": "",
+        "type": "array",
+        "handler": "src/telemetry/errors.js",
+        "description": "Active LuxOS events, each with code, description, target and doc URL. An empty array means no active event."
+      },
+      {
+        "name": "device_info",
+        "unit": "",
+        "type": "object",
+        "handler": "src/telemetry/device-info.js",
+        "description": "Model, serial number, MAC, IP, hostname, control board, cooling type, PSU and nameplate hashrate."
+      },
+      {
+        "name": "firmware_info",
+        "unit": "",
+        "type": "object",
+        "handler": "src/telemetry/firmware-info.js",
+        "description": "LuxOS version, API version and compile time."
+      },
+      {
+        "name": "snap",
+        "unit": "",
+        "type": "object",
+        "handler": "src/telemetry/snap.js",
+        "description": "Full snapshot of stats and config. A failed source shows { error } in its place."
+      }
+    ],
+    "commands": [
+      {
+        "name": "reboot",
+        "handler": "src/commands/reboot.js",
+        "params": [],
+        "description": "Reboots the miner. Several minutes of downtime. 5-minute cooldown, consumed by every attempt. Never retry automatically."
+      },
+      {
+        "name": "setLED",
+        "handler": "src/commands/set-led.js",
+        "params": [
+          {
+            "name": "enabled",
+            "type": "boolean",
+            "required": true,
+            "description": "true blinks the red LED to locate the miner; false returns it to automatic mode."
+          }
+        ],
+        "description": "Turns the locate LED on or off."
+      },
+      {
+        "name": "setPowerMode",
+        "handler": "src/commands/set-power-mode.js",
+        "params": [
+          {
+            "name": "mode",
+            "type": "string",
+            "required": true,
+            "enum": [
+              "normal",
+              "sleep"
+            ],
+            "description": "sleep curtails the miner (hashboards and PSU off); normal wakes it up."
+          }
+        ],
+        "description": "Curtails or wakes up the miner. A sleeping miner stays asleep across reboots until woken up."
+      },
+      {
+        "name": "setProfile",
+        "handler": "src/commands/set-profile.js",
+        "params": [
+          {
+            "name": "profile",
+            "type": "string",
+            "required": true,
+            "description": "Name of an existing profile, as listed by the profiles API. LuxOS names use letters, digits, '_', '-', '+', '.' and spaces."
+          }
+        ],
+        "description": "Applies a LuxOS performance profile to all hashboards. The boards ramp to the new frequency and voltage."
+      },
+      {
+        "name": "setupPools",
+        "handler": "src/commands/setup-pools.js",
+        "params": [
+          {
+            "name": "pools",
+            "type": "object",
+            "required": true,
+            "description": "Array of 1-3 entries of { url, user, password } (or worker_name, worker_password). Values must not contain commas."
+          }
+        ],
+        "description": "Replaces the pool list: adds the new pools, then removes the old ones."
+      }
+    ],
+    "config": {
+      "schema": "luxos_config_v1"
+    },
+    "health": {
+      "supportedStates": [
+        "OK",
+        "DEGRADED",
+        "OFFLINE"
+      ],
+      "alerts": [
+        "alert.overheat",
+        "alert.fan_failure",
+        "alert.hashrate_low",
+        "alert.hashboard_error",
+        "alert.pool_dead"
+      ],
+      "troubleshooting": [
+        "If alert.overheat, check fan speeds, the errors channel and the inlet temperature. Do not raise the profile until resolved.",
+        "If alert.fan_failure, a fan at 0 RPM on a running air-cooled miner is a mechanical failure.",
+        "If alert.hashrate_low, the miner may be ramping after a reboot, profile change or wake-up — wait 15 minutes before acting.",
+        "If alert.hashboard_error persists after a reboot, read the errors channel and escalate to an operator.",
+        "If alert.pool_dead, check the pool URLs and network path; all pools Dead means the miner is mining nothing.",
+        "If a write fails with ERR_SESSION_BUSY, someone else is changing the miner. Wait; never force their session off.",
+        "If status is OFFLINE, do not attempt reboot. Escalate to an operator."
+      ]
+    },
+    "errors": {
+      "ERR_DEVICE_CONFIG_INVALID": "The device config is missing an address or has an invalid port or timeout.",
+      "ERR_TCP_TIMEOUT": "The miner did not answer within the timeout. For writes the physical outcome is unknown — never retry automatically.",
+      "ERR_TCP_CONNECTION": "The TCP connection failed or was reset. For writes the physical outcome is unknown — never retry automatically.",
+      "ERR_API_RESPONSE_INVALID": "The miner returned a non-JSON answer or a section without an expected field.",
+      "ERR_API_STATUS_ERROR": "LuxOS answered STATUS E for the command. The message carries the firmware's reason.",
+      "ERR_SESSION_BUSY": "Another tool or operator holds the LuxOS session. The worker never kills it; retry after that session ends.",
+      "ERR_COMMAND_FAILED": "The command failed without a more specific error code.",
+      "ERR_COMMAND_COOLDOWN": "The command was issued before its cooldown elapsed.",
+      "ERR_COMMAND_IN_PROGRESS": "A command of this type is already running for the device.",
+      "ERR_SET_LED_ENABLED_INVALID": "The setLED enabled parameter is not a boolean.",
+      "ERR_SET_POWER_MODE_INVALID": "The power mode is not normal or sleep.",
+      "ERR_SET_PROFILE_INVALID": "The profile name is missing or is not a valid LuxOS profile name (letters, digits, '_', '-', '+', '.' and spaces, starting and ending with a letter or digit).",
+      "ERR_PROFILE_UNKNOWN": "The miner has no profile with that name.",
+      "ERR_POOLS_INVALID": "The pool list must contain 1-3 entries, each with a stratum url and a user, and no commas.",
+      "ERR_POOLS_PARTIAL": "The pool change stopped part way. The message says which pools are in place; check the pools telemetry before acting again.",
+      "ERR_POOLS_GROUPS_UNSUPPORTED": "The miner has pools in more than one LuxOS pool group. setupPools only replaces a single-group pool list; change multi-group setups by hand."
+    }
+  }
+}
