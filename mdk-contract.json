@@ -63,7 +63,7 @@
         "unit": "",
         "type": "string",
         "handler": "src/telemetry/status.js",
-        "description": "error when LuxOS reports an active event with a severity other than Info, sleeping when curtailed, otherwise mining or not_mining from the 5-second hashrate."
+        "description": "error when LuxOS reports an active event that is not marked Info severity (an event without a severity counts), sleeping when curtailed, otherwise mining or not_mining from the 5-second hashrate."
       },
       {
         "name": "uptime",

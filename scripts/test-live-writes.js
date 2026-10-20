@@ -34,10 +34,16 @@ const POLL_MS = 5000
 
 function parseArgs (argv) {
   const args = { positional: [], steps: [], profile: null, poolPassword: null }
+  // A flag given last with no value must fail, not become undefined: an
+  // undefined pool password would wipe the miner's real ones. '' is a value.
+  const value = (i) => {
+    if (i >= argv.length || argv[i].startsWith('--')) throw new Error(`ERR_LIVE_USAGE: ${argv[i - 1]} needs a value`)
+    return argv[i]
+  }
   for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === '--steps') args.steps = (argv[++i] || '').split(',').filter(Boolean)
-    else if (argv[i] === '--profile') args.profile = argv[++i]
-    else if (argv[i] === '--pool-password') args.poolPassword = argv[++i]
+    if (argv[i] === '--steps') args.steps = value(++i).split(',').filter(Boolean)
+    else if (argv[i] === '--profile') args.profile = value(++i)
+    else if (argv[i] === '--pool-password') args.poolPassword = value(++i)
     else args.positional.push(argv[i])
   }
   const [address, port = '4028'] = args.positional
