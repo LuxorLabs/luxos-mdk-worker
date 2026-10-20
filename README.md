@@ -35,21 +35,28 @@ and list one device per miner:
 const path = require('node:path')
 const WorkerRuntimeV2 = require('@tetherto/mdk/backend/core/mdk-worker/lib/worker-runtime-v2')
 
-const runtime = new WorkerRuntimeV2(
-  path.dirname(require.resolve('luxos-mdk-worker/mdk-contract.json')),
-  {
-    workerId: 'luxos-site-1',
-    storeDir: './store/luxos-site-1',
-    devices: [
-      { deviceId: 'rack1-slot1', config: { address: '10.0.1.21' } },
-      { deviceId: 'rack1-slot2', config: { address: '10.0.1.22', port: 4028, timeout: 10000 } }
-    ]
-  }
-)
+async function main () {
+  const runtime = new WorkerRuntimeV2(
+    path.dirname(require.resolve('luxos-mdk-worker/mdk-contract.json')),
+    {
+      workerId: 'luxos-site-1',
+      storeDir: './store/luxos-site-1',
+      devices: [
+        { deviceId: 'rack1-slot1', config: { address: '10.0.1.21' } },
+        { deviceId: 'rack1-slot2', config: { address: '10.0.1.22', port: 4028, timeout: 10000 } }
+      ]
+    }
+  )
 
-await runtime.start()
-// Register this public key with your Kernel.
-console.log(runtime.getPublicKey().toString('hex'))
+  await runtime.start()
+  // Register this public key with your Kernel.
+  console.log(runtime.getPublicKey().toString('hex'))
+}
+
+main().catch((err) => {
+  console.error(err)
+  process.exitCode = 1
+})
 ```
 
 | Device config | Default | Meaning |
@@ -72,7 +79,9 @@ npm test
 ```
 
 The tests run against a local fake of the LuxOS TCP API, so they need no
-miner. `npm run mock` starts the fake on `127.0.0.1:14028`.
+miner. `npm run mock` starts the fake on `127.0.0.1:14028`. The integration
+suite also registers the worker with a real MDK Kernel and checks that it
+reaches `READY`, serves every telemetry channel and runs a command end to end.
 
 To check a real miner without changing it, run:
 
@@ -82,3 +91,26 @@ npm run test:live -- <miner-ip>
 
 The script never opens a session and never writes. It prints every channel
 and exits nonzero if any channel fails.
+
+To check the commands on controlled test hardware, name the steps to run:
+
+```bash
+npm run test:live:writes -- <miner-ip> --steps led,power,profile,pools,reboot
+```
+
+`power` and `profile` confirm the change on the miner, then restore the
+previous state and confirm that too, also after a failure or a first Ctrl-C;
+if a restore fails, the script says what state it left the miner in. The LED
+blinks for 10 seconds and then goes back to automatic, which only someone at
+the miner can confirm. `pools` replaces the pool list with the same URLs and
+users and checks the result. LuxOS never returns pool passwords, so every
+pool gets `--pool-password`, which is required for this step. `reboot` waits
+for the miner to come back. Curtailing, re-profiling and rebooting
+stop hashing for a while, so run these only on a miner you can take offline.
+Switching the profile restarts LuxOS autotuning, so after the `profile` step
+the miner can run at reduced hashrate for a while even though the profile is
+back. Pass `--profile <name>` to pick a neighbouring profile; the default is
+the first other profile LuxOS lists, often the lowest.
+
+All five commands were verified this way on an Antminer S21 running LuxOS
+2026.7.31.

@@ -8,6 +8,8 @@ const mdk = (file) => require(path.join(MDK, 'backend/core', file))
 
 module.exports = {
   WORKER_DIR: path.resolve(__dirname, '..'),
+  kernel: mdk('mdk'),
+  client: mdk('client'),
   WorkerRuntimeV2: mdk('mdk-worker/lib/worker-runtime-v2'),
   loadContract: mdk('mdk-worker/lib/contract-loader').loadContract,
   createInstance: mdk('mdk-worker/lib/instance-loader').createInstance,

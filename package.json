@@ -24,6 +24,7 @@
     "src/",
     "lib/",
     "mock/",
+    "smoke.config.js",
     "README.md",
     "USAGE.md",
     "LICENSE",
@@ -39,6 +40,7 @@
     "test:integration": "NODE_ENV=test brittle tests/integration/*.test.js",
     "test:coverage": "NODE_ENV=test brittle --coverage 'tests/**/*.test.js'",
     "test:live": "node scripts/test-live-readonly.js",
+    "test:live:writes": "node scripts/test-live-writes.js",
     "validate:contract": "node scripts/validate-contract.js"
   },
   "devDependencies": {

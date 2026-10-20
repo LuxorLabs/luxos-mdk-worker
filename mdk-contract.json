@@ -63,7 +63,7 @@
         "unit": "",
         "type": "string",
         "handler": "src/telemetry/status.js",
-        "description": "error when LuxOS reports an active event, sleeping when curtailed, otherwise mining or not_mining from the 5-second hashrate."
+        "description": "error when LuxOS reports an active event with a severity other than Info, sleeping when curtailed, otherwise mining or not_mining from the 5-second hashrate."
       },
       {
         "name": "uptime",
@@ -126,7 +126,7 @@
         "unit": "",
         "type": "array",
         "handler": "src/telemetry/errors.js",
-        "description": "Active LuxOS events, each with code, description, target and doc URL. An empty array means no active event."
+        "description": "Active LuxOS events, each with code, description, severity, target and doc URL. An empty array means no active event."
       },
       {
         "name": "device_info",
