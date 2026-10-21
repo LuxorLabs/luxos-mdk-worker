@@ -47,7 +47,8 @@ module.exports = () => ({
   },
   fans: [0, 1, 2, 3].map((id) => ({ FAN: `J${12 + id}`, ID: id, RPM: 3900 - id * 60, Speed: 49 })),
   power: { PSU: true, Watts: 3010 },
-  events: [],
+  // A tuned miner keeps this informational event, as real LuxOS 2026.7 does.
+  events: [{ Code: 'MINER_TUNED', CreatedAt: '2026-01-01T00:00:00+00:00', Description: 'Miner has completed tuning and is maintaining current performance.', DocUrl: 'https://docs.luxor.tech/firmware/kb/eventstroubleshooting#miner-tuned', Severity: 'Info', Target: 'MINER' }],
   pools: [
     { POOL: 0, Priority: 0, GROUP: 0, URL: 'stratum+tcp://btc.global.luxor.tech:700', User: 'account.worker', Status: 'Alive', 'Stratum Active': true, Accepted: 179, Rejected: 2, Stale: 1, Quota: 1 }
   ],

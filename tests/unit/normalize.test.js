@@ -62,8 +62,16 @@ test('status: events win, then curtailment, then hashrate', (t) => {
   t.is(n.powerMode(outputs(state).config), 'sleep')
   state.events = [{ Code: 'FAN_FAILURE', Description: 'Fan failure', Target: 'FAN', ID: 2 }]
   t.is(n.status(outputs(state)), 'error')
-  t.alike(n.errors(outputs(state).events)[0], { code: 'FAN_FAILURE', description: 'Fan failure', details: null, target: 'FAN', target_id: 2, created_at: null, doc_url: null })
+  t.alike(n.errors(outputs(state).events)[0], { code: 'FAN_FAILURE', description: 'Fan failure', severity: null, details: null, target: 'FAN', target_id: 2, created_at: null, doc_url: null })
   state.config.CurtailMode = 'None'
+  // real LuxOS 2026.7 keeps MINER_TUNED (Severity Info) active on a healthy miner
+  state.events = [{ Code: 'MINER_TUNED', Description: 'Miner has completed tuning', Severity: 'Info', Target: 'MINER' }]
+  t.is(n.status(outputs(state)), 'mining', 'informational events are not errors')
+  t.is(n.errors(outputs(state).events)[0].severity, 'Info')
+  state.events[0].Severity = 'INFO'
+  t.is(n.status(outputs(state)), 'mining', 'severity is matched case-insensitively')
+  state.events = [{ Code: 'FAN_FAILURE', Description: 'Fan failure', Severity: 'Warning', Target: 'FAN', ID: 2 }]
+  t.is(n.status(outputs(state)), 'error', 'non-info events are errors')
   state.events = []
   state.summary['GHS 5s'] = 0
   t.is(n.status(outputs(state)), 'not_mining')

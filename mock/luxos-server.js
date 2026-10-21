@@ -105,6 +105,7 @@ function run (state, command, params, failing) {
       return status(317, 'Session dropped')
     case 'rebootdevice':
       state.reboots++
+      state.summary.Elapsed = 0
       return status(328, 'Rebooting device')
     case 'ledset': {
       const [, color, mode] = params

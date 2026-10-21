@@ -40,15 +40,18 @@ TH/s.
 | `pool_url` | | first `Alive` pool, else the first pool by priority |
 | `pools` | | pools in priority order. The API never returns passwords |
 | `hashboards` | | devs per board, with `temps` readings named by their METADATA labels |
-| `errors` | | active LuxOS events with code, description, target and doc URL |
+| `errors` | | active LuxOS events with code, description, severity, target and doc URL |
 | `device_info` | | model, serial, MAC, IP, hostname, control board, cooling, PSU, nameplate TH/s |
 | `firmware_info` | | LuxOS version, API version, compile time |
 | `snap` | | all of the above in one object. A failed source shows `{ error }` in its place |
 
-`status` is `error` while LuxOS reports any active event, `sleeping` while
-the miner is curtailed, and otherwise `mining` or `not_mining` from the
-5-second hashrate. Firmware without the `events` command still reports a
+`status` is `error` while LuxOS reports an active event with a severity
+other than `Info`, `sleeping` while the miner is curtailed, and otherwise `mining` or
+`not_mining` from the 5-second hashrate. Firmware without the `events` command still reports a
 status; the `errors` channel then fails with `ERR_API_STATUS_ERROR`.
+Informational events such as `MINER_TUNED`, which a healthy miner keeps
+after autotuning, still appear in `errors`. An event without a severity
+counts as an error.
 
 A missing or malformed reading is an `ERR_API_RESPONSE_INVALID` error, never
 a zero.
