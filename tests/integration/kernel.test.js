@@ -3,7 +3,7 @@
 const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
-const test = require('brittle')
+const test = require('../t')
 const { WORKER_DIR, WorkerRuntimeV2, kernel: mdk, client } = require('../helpers')
 const { createServer } = require('../../mock/luxos-server')
 const contract = require('../../mdk-contract.json')

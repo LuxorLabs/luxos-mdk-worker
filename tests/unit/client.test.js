@@ -1,6 +1,6 @@
 'use strict'
 
-const test = require('brittle')
+const test = require('../t')
 const { LuxosClient } = require('../../lib/luxos-client')
 const { createServer } = require('../../mock/luxos-server')
 
