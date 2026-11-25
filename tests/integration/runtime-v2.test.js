@@ -1,6 +1,6 @@
 'use strict'
 
-const test = require('brittle')
+const test = require('../t')
 const { WORKER_DIR, WorkerRuntimeV2, envelope, actions } = require('../helpers')
 const { createServer } = require('../../mock/luxos-server')
 

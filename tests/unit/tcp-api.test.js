@@ -1,7 +1,7 @@
 'use strict'
 
 const net = require('node:net')
-const test = require('brittle')
+const test = require('../t')
 const { sendRequest, parseResponse, assertSuccess } = require('../../lib/tcp-api')
 
 async function server (t, onConnection) {

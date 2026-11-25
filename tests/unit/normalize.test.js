@@ -1,6 +1,6 @@
 'use strict'
 
-const test = require('brittle')
+const test = require('../t')
 const n = require('../../lib/normalize')
 const defaultState = require('../../mock/state')
 
